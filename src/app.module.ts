@@ -9,7 +9,6 @@ import { StartupsModule } from './startups/startups.module';
 import { InvestmentsModule } from './investments/investments.module';
 import { BetsModule } from './bets/bets.module';
 import { CommentsModule } from './comments/comments.module';
-import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -52,7 +51,6 @@ import { AiModule } from './ai/ai.module';
     InvestmentsModule,
     BetsModule,
     CommentsModule,
-    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
