@@ -51,8 +51,11 @@ export class InvestmentsService {
     return 'This action adds a new investment';
   }
 
-  findAll() {
-    return `This action returns all investments`;
+  async findAll() {
+    return this.investmentRepo.find({
+      relations: { startup: true },
+      order: { timestamp: 'DESC' },
+    });
   }
 
   findOne(id: number) {
