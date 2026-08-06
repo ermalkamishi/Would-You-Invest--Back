@@ -51,6 +51,13 @@ export class InvestmentsService {
     return 'This action adds a new investment';
   }
 
+  async findByStartupId(startupId: string) {
+    return this.investmentRepo.find({
+      where: { startupId },
+      order: { timestamp: 'ASC' },
+    });
+  }
+
   async findAll() {
     return this.investmentRepo.find({
       relations: { startup: true },

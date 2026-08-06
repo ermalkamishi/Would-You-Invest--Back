@@ -22,6 +22,11 @@ export class InvestmentsController {
     return this.investmentsService.findByUserId(userId);
   }
 
+  @Get('startup/:startupId')
+  findByStartup(@Param('startupId') startupId: string) {
+    return this.investmentsService.findByStartupId(startupId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.investmentsService.findOne(+id);
