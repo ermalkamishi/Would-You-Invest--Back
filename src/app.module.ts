@@ -9,6 +9,7 @@ import { StartupsModule } from './startups/startups.module';
 import { InvestmentsModule } from './investments/investments.module';
 import { BetsModule } from './bets/bets.module';
 import { CommentsModule } from './comments/comments.module';
+import { SimulatorModule } from './simulator/simulator.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CommentsModule } from './comments/comments.module';
     InvestmentsModule,
     BetsModule,
     CommentsModule,
+    SimulatorModule,
   ],
   controllers: [AppController],
   providers: [AppService],
