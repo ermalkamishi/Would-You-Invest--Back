@@ -24,20 +24,19 @@ import { SimulatorModule } from './simulator/simulator.module';
         const dbSsl = configService.get<string>('DB_SSL');
 
         if (databaseUrl) {
-          // Render External DB URLs (.render.com) and DB_SSL=true REQUIRE SSL.
-          // Render Internal DB URLs (dpg-xxxx without .render.com) do NOT use SSL.
-          const isExternalDb =
-            databaseUrl.includes('.render.com') ||
-            databaseUrl.includes('sslmode=require') ||
-            databaseUrl.includes('ssl=true') ||
-            dbSsl === 'true';
+          // Render Internal DB URLs (dpg-xxxx without .render.com) use private network without SSL.
+          // External DB URLs (.render.com, sslmode=require, or Neon/Supabase) require SSL.
+          const isInternalDb =
+            databaseUrl.includes('dpg-') && !databaseUrl.includes('.render.com');
+          const useSsl =
+            dbSsl === 'true' ? true : dbSsl === 'false' ? false : !isInternalDb;
 
           return {
             type: 'postgres',
             url: databaseUrl,
             autoLoadEntities: true,
             synchronize: true,
-            ssl: isExternalDb ? { rejectUnauthorized: false } : false,
+            ssl: useSsl ? { rejectUnauthorized: false } : false,
           };
         }
 
