@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Patch, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Patch,
+  BadRequestException,
+} from '@nestjs/common';
 import { StartupsService } from './startups.service';
 import { CreateStartupDto } from './dto/create-startup.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -47,10 +58,7 @@ export class StartupsController {
 
   // PATCH /startups/:id/status — update moderation status
   @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: string,
-  ) {
+  updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.startupsService.updateStatus(id, status);
   }
 
@@ -62,10 +70,7 @@ export class StartupsController {
 
   // POST /startups/:id/pass — submit pass reason
   @Post(':id/pass')
-  submitPass(
-    @Param('id') id: string,
-    @Body('reason') reason: string,
-  ) {
+  submitPass(@Param('id') id: string, @Body('reason') reason: string) {
     return this.startupsService.submitPassReason(id, reason);
   }
 

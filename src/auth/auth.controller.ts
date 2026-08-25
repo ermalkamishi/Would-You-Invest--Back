@@ -22,10 +22,7 @@ export class AuthController {
   }
 
   @Post('login')
-  login(
-    @Body('email') email: string,
-    @Body('password') password?: string,
-  ) {
+  login(@Body('email') email: string, @Body('password') password?: string) {
     return this.authService.login(email, password);
   }
 

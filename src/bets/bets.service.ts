@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bet } from './entities/bet.entity';
@@ -26,7 +30,8 @@ export class BetsService {
   ): Promise<Bet> {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User not found');
-    if (user.role === 'founder') throw new BadRequestException('Founders cannot place bets');
+    if (user.role === 'founder')
+      throw new BadRequestException('Founders cannot place bets');
 
     const startup = await this.startupRepo.findOneBy({ id: startupId });
     if (!startup) throw new NotFoundException('Startup not found');
@@ -67,13 +72,17 @@ export class BetsService {
 
       const startup = bet.startup;
       let currentVal = 0;
-      if (bet.milestoneType === 'backers') currentVal = Number(startup.investorCount);
-      else if (bet.milestoneType === 'raised') currentVal = Number(startup.totalRaised);
-      else if (bet.milestoneType === 'price') currentVal = Number(startup.currentPrice);
+      if (bet.milestoneType === 'backers')
+        currentVal = Number(startup.investorCount);
+      else if (bet.milestoneType === 'raised')
+        currentVal = Number(startup.totalRaised);
+      else if (bet.milestoneType === 'price')
+        currentVal = Number(startup.currentPrice);
 
       const target = Number(bet.targetValue);
       const isTargetReached = currentVal >= target;
-      const isExpired = (now.getTime() - new Date(bet.timestamp).getTime()) >= threeDaysMs;
+      const isExpired =
+        now.getTime() - new Date(bet.timestamp).getTime() >= threeDaysMs;
 
       let shouldResolve = false;
       let won = false;
@@ -98,7 +107,8 @@ export class BetsService {
         if (won) {
           const user = await this.userRepo.findOneBy({ id: userId });
           if (user) {
-            user.walletBalance = Number(user.walletBalance) + Number(bet.payout);
+            user.walletBalance =
+              Number(user.walletBalance) + Number(bet.payout);
             await this.userRepo.save(user);
           }
         }

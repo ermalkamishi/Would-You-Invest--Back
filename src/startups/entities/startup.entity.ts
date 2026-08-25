@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Comment } from '../../comments/entities/comment.entity';
 
@@ -48,7 +57,7 @@ export class Startup {
   status: string;
 
   // Market Data (Fake Economy)
-  @Column({ type: 'decimal', precision: 12, scale: 4, default: 0.10 }) // Starting share price $0.10
+  @Column({ type: 'decimal', precision: 12, scale: 4, default: 0.1 }) // Starting share price $0.10
   currentPrice: number;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
@@ -72,4 +81,3 @@ export class Startup {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-

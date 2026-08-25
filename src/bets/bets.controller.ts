@@ -33,4 +33,3 @@ export class BetsController {
     return this.betsService.findByUserId(userId);
   }
 }
-

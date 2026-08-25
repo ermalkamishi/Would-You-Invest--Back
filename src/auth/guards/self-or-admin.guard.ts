@@ -17,6 +17,8 @@ export class SelfOrAdminGuard implements CanActivate {
     if (user.role === 'admin') return true;
     if (user.id === paramId) return true;
 
-    throw new ForbiddenException('You can only perform this action on your own account');
+    throw new ForbiddenException(
+      'You can only perform this action on your own account',
+    );
   }
 }

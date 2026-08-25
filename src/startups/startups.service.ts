@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Startup } from './entities/startup.entity';
@@ -22,12 +27,7 @@ export class StartupsService {
     if (founderId !== 'anonymous') {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
-      const pitchesToday = await this.startupRepo.count({
-        where: {
-          founderId,
-        },
-      });
-      // Only count pitches created today via a raw query
+      // Only count pitches created today via query builder
       const todayCount = await this.startupRepo
         .createQueryBuilder('startup')
         .where('startup.founderId = :founderId', { founderId })
@@ -52,7 +52,8 @@ export class StartupsService {
   }
 
   async findAll(sortBy = 'hot', allStatuses = false): Promise<Startup[]> {
-    const query = this.startupRepo.createQueryBuilder('startup')
+    const query = this.startupRepo
+      .createQueryBuilder('startup')
       .leftJoinAndSelect('startup.founder', 'founder')
       .leftJoinAndSelect('startup.comments', 'comments')
       .leftJoinAndSelect('comments.user', 'user');
@@ -93,7 +94,11 @@ export class StartupsService {
    * Updates totalRaised, investorCount, and current price (simple bonding curve).
    * Deducts from User wallet and creates an Investment record.
    */
-  async invest(startupId: string, amount: number, userId: string): Promise<Startup> {
+  async invest(
+    startupId: string,
+    amount: number,
+    userId: string,
+  ): Promise<Startup> {
     const startup = await this.findOne(startupId);
     const user = await this.userRepo.findOneBy({ id: userId });
 
@@ -108,7 +113,9 @@ export class StartupsService {
     const maxAllowed = Number(user.walletBalance) * 0.2;
     // Exclude admins from concentration limit for debugging/demo ease, but apply to normal investors
     if (user.role !== 'admin' && amount > maxAllowed) {
-      throw new BadRequestException(`Concentration limit: max 20% of wallet in one idea (${maxAllowed.toFixed(2)}).`);
+      throw new BadRequestException(
+        `Concentration limit: max 20% of wallet in one idea (${maxAllowed.toFixed(2)}).`,
+      );
     }
 
     // Deduct from wallet
@@ -164,7 +171,11 @@ export class StartupsService {
     return this.startupRepo.save(startup);
   }
 
-  async addUpdate(id: string, founderId: string, text: string): Promise<Startup> {
+  async addUpdate(
+    id: string,
+    founderId: string,
+    text: string,
+  ): Promise<Startup> {
     const startup = await this.findOne(id);
     if (startup.founderId !== founderId) {
       throw new ForbiddenException('Only the founder can post updates');

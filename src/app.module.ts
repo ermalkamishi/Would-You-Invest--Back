@@ -21,7 +21,7 @@ import { SimulatorModule } from './simulator/simulator.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const databaseUrl = configService.get<string>('DATABASE_URL');
-        
+
         if (databaseUrl) {
           return {
             type: 'postgres',
@@ -58,5 +58,3 @@ import { SimulatorModule } from './simulator/simulator.module';
   providers: [AppService],
 })
 export class AppModule {}
-
-

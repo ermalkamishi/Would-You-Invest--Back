@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -24,7 +28,13 @@ export class AuthService {
     return { access_token, user: enrichedUser };
   }
 
-  async register(email: string, username: string, role: string, password: string, referrer?: string) {
+  async register(
+    email: string,
+    username: string,
+    role: string,
+    password: string,
+    referrer?: string,
+  ) {
     const cleanedEmail = email?.trim().toLowerCase();
     const cleanedUsername = username?.trim().toLowerCase();
 
@@ -40,26 +50,36 @@ export class AuthService {
     }
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
     if (!usernameRegex.test(cleanedUsername)) {
-      throw new BadRequestException('Username can only contain letters, numbers, and underscores');
+      throw new BadRequestException(
+        'Username can only contain letters, numbers, and underscores',
+      );
     }
 
-    const existingUsername = await this.userRepo.findOneBy({ username: cleanedUsername });
+    const existingUsername = await this.userRepo.findOneBy({
+      username: cleanedUsername,
+    });
     if (existingUsername) {
       throw new BadRequestException('Username is already taken');
     }
 
-    const existingEmail = await this.userRepo.findOneBy({ email: cleanedEmail });
+    const existingEmail = await this.userRepo.findOneBy({
+      email: cleanedEmail,
+    });
     if (existingEmail) {
       throw new BadRequestException('User with this email already exists');
     }
 
     // 3. Password strength check
     if (!password || password.length < 8) {
-      throw new BadRequestException('Password must be at least 8 characters long');
+      throw new BadRequestException(
+        'Password must be at least 8 characters long',
+      );
     }
     const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
     if (!specialCharRegex.test(password)) {
-      throw new BadRequestException('Password must contain at least one special character (!@#$%^&*, etc.)');
+      throw new BadRequestException(
+        'Password must contain at least one special character (!@#$%^&*, etc.)',
+      );
     }
 
     let walletBalance = role === 'founder' ? 0 : 10000;

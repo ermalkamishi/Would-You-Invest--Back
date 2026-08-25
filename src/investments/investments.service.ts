@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Investment } from './entities/investment.entity';
@@ -27,10 +27,20 @@ export class InvestmentsService {
       const sharesBought = Number(inv.sharesBought);
 
       if (existing) {
-        existing.amountInvested = parseFloat((existing.amountInvested + amountInvested).toFixed(2));
-        existing.sharesBought = parseFloat((existing.sharesBought + sharesBought).toFixed(4));
+        existing.amountInvested = parseFloat(
+          (existing.amountInvested + amountInvested).toFixed(2),
+        );
+        existing.sharesBought = parseFloat(
+          (existing.sharesBought + sharesBought).toFixed(4),
+        );
         // Average entry price
-        existing.entryPrice = parseFloat(((existing.entryPrice * (existing.sharesBought - sharesBought) + Number(inv.entryPrice) * sharesBought) / existing.sharesBought).toFixed(4));
+        existing.entryPrice = parseFloat(
+          (
+            (existing.entryPrice * (existing.sharesBought - sharesBought) +
+              Number(inv.entryPrice) * sharesBought) /
+            existing.sharesBought
+          ).toFixed(4),
+        );
       } else {
         portfolioMap.set(inv.startupId, {
           id: inv.startup.id,
@@ -47,8 +57,9 @@ export class InvestmentsService {
     return Array.from(portfolioMap.values());
   }
 
-  create(createInvestmentDto: CreateInvestmentDto) {
-    return 'This action adds a new investment';
+  async create(createInvestmentDto: CreateInvestmentDto): Promise<Investment> {
+    const investment = this.investmentRepo.create(createInvestmentDto);
+    return this.investmentRepo.save(investment);
   }
 
   async findByStartupId(startupId: string) {
@@ -65,15 +76,25 @@ export class InvestmentsService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} investment`;
+  async findOne(id: string): Promise<Investment> {
+    const inv = await this.investmentRepo.findOne({
+      where: { id },
+      relations: { startup: true, user: true },
+    });
+    if (!inv) throw new NotFoundException('Investment not found');
+    return inv;
   }
 
-  update(id: number, updateInvestmentDto: UpdateInvestmentDto) {
-    return `This action updates a #${id} investment`;
+  async update(
+    id: string,
+    updateInvestmentDto: UpdateInvestmentDto,
+  ): Promise<Investment> {
+    const inv = await this.findOne(id);
+    const updated = this.investmentRepo.merge(inv, updateInvestmentDto);
+    return this.investmentRepo.save(updated);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} investment`;
+  async remove(id: string): Promise<void> {
+    await this.investmentRepo.delete(id);
   }
 }

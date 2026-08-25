@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -22,8 +26,9 @@ export class UsersService {
     private readonly referralRepo: Repository<Referral>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = this.userRepo.create(createUserDto);
+    return this.userRepo.save(user);
   }
 
   findAll() {
@@ -33,7 +38,9 @@ export class UsersService {
   async getLeaderboardByRoi() {
     const users = await this.userRepo.find({ where: { role: 'investor' } });
     const startups = await this.userRepo.manager.find(Startup);
-    const sortedStartups = [...startups].sort((a, b) => Number(b.totalRaised) - Number(a.totalRaised));
+    const sortedStartups = [...startups].sort(
+      (a, b) => Number(b.totalRaised) - Number(a.totalRaised),
+    );
     const topTenIds = sortedStartups.slice(0, 10).map((s) => s.id);
 
     const leaderboard = [];
@@ -59,14 +66,16 @@ export class UsersService {
 
       for (const inv of investments) {
         totalInvested += Number(inv.amountInvested);
-        const rawValue = Number(inv.sharesBought) * Number(inv.startup?.currentPrice || 0);
+        const rawValue =
+          Number(inv.sharesBought) * Number(inv.startup?.currentPrice || 0);
         const isTopTen = topTenIds.includes(inv.startupId);
         totalValue += isTopTen ? rawValue * 1.2 : rawValue;
       }
 
-      const roiPercent = totalInvested > 0 
-        ? ((totalValue - totalInvested) / totalInvested) * 100 
-        : 0;
+      const roiPercent =
+        totalInvested > 0
+          ? ((totalValue - totalInvested) / totalInvested) * 100
+          : 0;
 
       leaderboard.push({
         id: user.id,
@@ -94,13 +103,13 @@ export class UsersService {
     if (!lastReset || lastReset < startOfWeek) {
       user.walletBalance = 10000;
       user.lastResetAt = new Date();
-      
+
       // Save updated user first
       await this.userRepo.save(user);
-      
+
       // Delete user investments
       await this.investmentRepo.delete({ userId: user.id });
-      
+
       return true;
     }
     return false;
@@ -120,7 +129,9 @@ export class UsersService {
 
     const existingUser = await this.userRepo.findOneBy({ email: cleanedEmail });
     if (existingUser) {
-      throw new BadRequestException('This email is already registered on CapTab');
+      throw new BadRequestException(
+        'This email is already registered on CapTab',
+      );
     }
 
     const existingReferral = await this.referralRepo.findOneBy({
@@ -141,12 +152,17 @@ export class UsersService {
     return user;
   }
 
-  async processReferralSignup(email: string, referrerUsername?: string): Promise<void> {
+  async processReferralSignup(
+    email: string,
+    referrerUsername?: string,
+  ): Promise<void> {
     const cleanedEmail = email.trim().toLowerCase();
 
     // 1. Link-based signup if referrerUsername is provided
     if (referrerUsername) {
-      const referrerUser = await this.userRepo.findOneBy({ username: referrerUsername });
+      const referrerUser = await this.userRepo.findOneBy({
+        username: referrerUsername,
+      });
       if (referrerUser && referrerUser.email.toLowerCase() !== cleanedEmail) {
         // Check if there is already an accepted referral for this friend
         const alreadyReferred = await this.referralRepo.findOneBy({
@@ -173,7 +189,8 @@ export class UsersService {
           }
 
           // Credit referrer
-          referrerUser.walletBalance = Number(referrerUser.walletBalance) + 5000;
+          referrerUser.walletBalance =
+            Number(referrerUser.walletBalance) + 5000;
           await this.userRepo.save(referrerUser);
           return;
         }
@@ -192,7 +209,9 @@ export class UsersService {
       referral.status = 'accepted';
       await this.referralRepo.save(referral);
 
-      const referrer = await this.userRepo.findOneBy({ id: referral.referrerId });
+      const referrer = await this.userRepo.findOneBy({
+        id: referral.referrerId,
+      });
       if (referrer) {
         referrer.walletBalance = Number(referrer.walletBalance) + 5000;
         await this.userRepo.save(referrer);
@@ -210,7 +229,9 @@ export class UsersService {
       where: { followerId: id },
       relations: { following: true },
     });
-    const followedFounders = followingRelations.map((f) => f.following).filter(Boolean);
+    const followedFounders = followingRelations
+      .map((f) => f.following)
+      .filter(Boolean);
 
     // Get followers list
     const followerRelations = await this.followRepo.find({
@@ -242,7 +263,10 @@ export class UsersService {
     });
 
     if (!existing) {
-      const follow = this.followRepo.create({ followerId, followingId: founderId });
+      const follow = this.followRepo.create({
+        followerId,
+        followingId: founderId,
+      });
       await this.followRepo.save(follow);
     }
 
