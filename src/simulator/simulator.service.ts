@@ -341,6 +341,14 @@ export class SimulatorService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     this.logger.log('Checking simulator status...');
+    setImmediate(() => {
+      this.runBackgroundBootstrap().catch((err) =>
+        this.logger.error('Error during background bootstrap:', err),
+      );
+    });
+  }
+
+  private async runBackgroundBootstrap() {
     await this.cleanupLegacyUsernames();
     await this.bootstrapInitialDataIfNeeded();
     await this.deduplicateAndEnrichComments();
