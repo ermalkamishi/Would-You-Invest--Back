@@ -110,14 +110,6 @@ export class StartupsService {
       throw new BadRequestException('Insufficient wallet balance');
     }
 
-    const maxAllowed = Number(user.walletBalance) * 0.2;
-    // Exclude admins from concentration limit for debugging/demo ease, but apply to normal investors
-    if (user.role !== 'admin' && amount > maxAllowed) {
-      throw new BadRequestException(
-        `Concentration limit: max 20% of wallet in one idea (${maxAllowed.toFixed(2)}).`,
-      );
-    }
-
     // Deduct from wallet
     user.walletBalance = Number(user.walletBalance) - amount;
 
